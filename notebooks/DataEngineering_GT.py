@@ -1,4 +1,8 @@
 # Databricks notebook source
+# MAGIC %pip install /dbfs/FileStore/sdk/Revanth/MLCoreSDK-0.5.96-py3-none-any.whl --force-reinstall
+
+# COMMAND ----------
+
 # MAGIC %pip install sparkmeasure
 
 # COMMAND ----------

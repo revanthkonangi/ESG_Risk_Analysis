@@ -1,4 +1,8 @@
 # Databricks notebook source
+# MAGIC %pip install /dbfs/FileStore/sdk/Revanth/MLCoreSDK-0.5.96-py3-none-any.whl --force-reinstall
+
+# COMMAND ----------
+
 # MAGIC %pip install sparkmeasure
 
 # COMMAND ----------
@@ -47,7 +51,7 @@ batch_size = solution_config["data_engineering"]["data_engineering_ft"].get("bat
 # COMMAND ----------
 
 if is_scheduled:
-    mlclient.log(operation_type="job_run_add", session_id = sdk_session_id, dbutils = dbutils, request_type = "de")
+    mlclient.log(operation_type="job_run_add", session_id = sdk_session_id, dbutils = dbutils, request_type = "de", verbose = True)
 
 # COMMAND ----------
 

@@ -1,6 +1,6 @@
 # Databricks notebook source
 # DBTITLE 1,Installing MLCore SDK
-# MAGIC %pip install /dbfs/FileStore/sdk/dev/MLCoreSDK-0.5.96-py3-none-any.whl --force-reinstall
+# MAGIC %pip install /dbfs/FileStore/sdk/Revanth/MLCoreSDK-0.5.96-py3-none-any.whl --force-reinstall
 
 # COMMAND ----------
 
@@ -131,136 +131,99 @@ data = FT_DF.toPandas()
 
 # COMMAND ----------
 
-import pandas as pd
 import numpy as np
-data.Dt_Customer = data.Dt_Customer.apply(lambda x : pd.to_datetime(str(x)))
-data.Dt_Customer.describe()
 
 # COMMAND ----------
 
-data["Age"] = 2021 - pd.to_datetime(data["Year_Birth"], format="%Y").apply(lambda x: x.year)
-data[data["Age"] > 100]
+data.replace('null', np.nan, inplace=True)
+
+# Count null values in each column
+null_counts = data.isnull().sum()
 
 # COMMAND ----------
 
-data.drop(data[data["Age"] > 100].index, inplace=True)
+null_counts
 
 # COMMAND ----------
 
-# Extracting registration year from the date
-data["Reg_year"] = data["Dt_Customer"].apply(lambda x: x.year)
-
-# Extracting registration quarter from the date
-data["Reg_quarter"] = data["Dt_Customer"].apply(lambda x: x.quarter)
-
-# Extracting registration month from the date
-data["Reg_month"] = data["Dt_Customer"].apply(lambda x: x.month)
-
-# Extracting registration week from the date
-data["Reg_week"] = data["Dt_Customer"].apply(lambda x: x.day // 7)
+data.info()
 
 # COMMAND ----------
 
-data.head()
+mode_value_col2 = data['Full_Time_Employees'].mode()[0]  # Calculate mode for 'col2'
+
+# Fill null values in 'col2' with the mode
+data['Full_Time_Employees'].fillna(mode_value_col2, inplace=True)
 
 # COMMAND ----------
 
-data["Education"] = data["Education"].replace("2n Cycle", "Master")
+data['Full_Time_Employees'] = data['Full_Time_Employees'].str.replace(',', '')
+
+# Convert back to float
+data['Full_Time_Employees'] = data['Full_Time_Employees'].astype(float)
+
+# Fill NA values with the median
+data['Full_Time_Employees'].fillna(data['Full_Time_Employees'].median(), inplace=True)
+
 
 # COMMAND ----------
 
-data["Marital_Status"] = data["Marital_Status"].replace(["YOLO", "Alone", "Absurd"], "Single")
-data["Marital_Status"] = data["Marital_Status"].replace(["Together"], "Married")
+columns_to_impute = ['Environment_Risk_Score', 'Governance_Risk_Score','Social_Risk_Score','Controversy_Score']
+
+# Impute missing values with the median for the specified columns
+for col in columns_to_impute:
+    median_value = data[col].median()
+    data[col].fillna(median_value, inplace=True)
 
 # COMMAND ----------
 
-data["Total_Amount_Spent"] = data[
-    [
-        "MntWines",
-        "MntFruits",
-        "MntMeatProducts",
-        "MntFishProducts",
-        "MntSweetProducts",
-        "MntGoldProds",
-    ]
-].sum(axis=1)
+data.info()
 
 # COMMAND ----------
 
-data[data["Income"] > 200000]
+mode_value_col2 = data['Controversy_Level'].mode()[0]  # Calculate mode for 'col2'
+
+# Fill null values in 'col2' with the mode
+data['Controversy_Level'].fillna(mode_value_col2, inplace=True)
 
 # COMMAND ----------
 
-data.drop(index=data[data.Income > 200000].index, inplace=True)
+data.info()
 
 # COMMAND ----------
 
-data.MntMeatProducts.nlargest(10)
+data['Pincode'] = data['Address'].str.extract(r'(\b\d{5}\b)').astype(float)
 
 # COMMAND ----------
 
-data[data["MntMeatProducts"] > 1580]
+data.info()
 
 # COMMAND ----------
 
-data["MntMeatProducts"].clip(upper=984, inplace=True)
+columns_to_impute = ['Controversy_Level','Sector','Industry']
+
+# Impute missing values with the mode for the specified columns
+for col in columns_to_impute:
+    mode_value = data[col].mode()[0]  # Calculate mode for each column
+    data[col].fillna(mode_value, inplace=True)
+
+print()
 
 # COMMAND ----------
-
-data[data["MntSweetProducts"] > 200]
-
-# COMMAND ----------
-
-data["MntSweetProducts"].clip(upper=198, inplace=True)
-
-# COMMAND ----------
-
-data[data["MntGoldProds"] > 250]
-
-# COMMAND ----------
-
-data["MntGoldProds"].clip(upper=250, inplace=True)
-
-# COMMAND ----------
-
-data[data["NumWebPurchases"] > 15]
-
-# COMMAND ----------
-
-data["NumWebPurchases"].clip(upper=11, inplace=True)
-
-# COMMAND ----------
-
-data[data["NumCatalogPurchases"] > 15]
-
-# COMMAND ----------
-
-data["NumCatalogPurchases"].clip(upper=11, inplace=True)
-
-# COMMAND ----------
-
-data.head(2)
-
-# COMMAND ----------
-
-data.drop(
-    columns=[
-        "Year_Birth",
-        "Dt_Customer",
-        "Reg_quarter",
-        "Total_Amount_Spent",
-    ],
-    inplace=True,
-)
-
-# COMMAND ----------
-
-categ = ['Education','Marital_Status']
 
 from sklearn.preprocessing import LabelEncoder
-# Encode Categorical Columns
-le = LabelEncoder()
-data[categ] = data[categ].apply(le.fit_transform)
+
+# COMMAND ----------
+
+columns_to_encode = ['Controversy_Level','Sector','Industry']
+
+# COMMAND ----------
+
+label_encoder = LabelEncoder()
+
+# Iterate over each column and label encode
+for col in columns_to_encode:
+    data[col] = label_encoder.fit_transform(data[col])
 
 # COMMAND ----------
 
