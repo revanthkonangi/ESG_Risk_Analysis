@@ -2,7 +2,7 @@ database_name: mysqltest_experiment
 ds_environment: dev
 sdk_session_id_dev: eb40921eb0d94c5f83d6e8a9309293b3
 sdk_session_id_uat: 64f8333b22dcbfd20b053385
-sdk_session_id_prod: 64ec92d6117247877965d152
+sdk_session_id_prod: 64ec92d6117247877965d1521
 data_engineering:
   data_engineering_ft:
     features_dbfs_path: dbfs:/mnt/mlcore/dev/source/Super_store_data_X_56dafba9d7a54dd7ab2d820d1a87cb46
