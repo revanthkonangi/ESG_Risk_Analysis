@@ -5,7 +5,7 @@
 # COMMAND ----------
 
 # DBTITLE 1,Installing MLCore SDK
-# MAGIC %pip install /dbfs/FileStore/sdk/dev/MLCoreSDK-0.5.96-py3-none-any.whl --force-reinstall
+# MAGIC %pip install /dbfs/FileStore/sdk/Revanth/MLCoreSDK-0.5.96-py3-none-any.whl --force-reinstall
 
 # COMMAND ----------
 
@@ -77,6 +77,10 @@ gt_data = spark.sql(f"SELECT * FROM {db_name}.{ground_truth_path}")
 
 # COMMAND ----------
 
+ft_data.count()
+
+# COMMAND ----------
+
 # DBTITLE 1,Check if any filters related to date or hyper parameter tuning are passed.
 try : 
     date_filters = dbutils.widgets.get("date_filters")
@@ -123,13 +127,17 @@ final_df = features_data.join(ground_truth_data, on = primary_keys)
 
 # COMMAND ----------
 
-# DBTITLE 1,Converting the Spark df to Pandas df
-final_df_pandas = final_df.toPandas()
-final_df_pandas.head()
+ground_truth_data
 
 # COMMAND ----------
 
-final_df_pandas.shape
+ground_truth_data.display()
+
+# COMMAND ----------
+
+# DBTITLE 1,Converting the Spark df to Pandas df
+final_df_pandas = final_df.toPandas()
+final_df_pandas.head()
 
 # COMMAND ----------
 
@@ -142,6 +150,10 @@ final_df_pandas.shape
 
 # COMMAND ----------
 
+final_df_pandas
+
+# COMMAND ----------
+
 # DBTITLE 1,Spliting the Final df to test and train dfs
 # Split the Data to Train and Test
 X_train, X_test, y_train, y_test = train_test_split(final_df_pandas[feature_columns], final_df_pandas[target_columns], test_size=test_size, random_state = 0)
@@ -149,25 +161,41 @@ X_train, X_test, y_train, y_test = train_test_split(final_df_pandas[feature_colu
 # COMMAND ----------
 
 # DBTITLE 1,Get Hyper Parameter Tuning Result
-try :
-    hp_tuning_result = dbutils.notebook.run("Hyperparameter_Tuning", timeout_seconds = 0)
-    hyperparameters = json.loads(hp_tuning_result)["best_hyperparameters"]
-except Exception as e:
-    print(e)
-    hyperparameters = {}
-    hp_tuning_result = {}
+# try :
+#     hp_tuning_result = dbutils.notebook.run("Hyperparameter_Tuning", timeout_seconds = 0)
+#     hyperparameters = json.loads(hp_tuning_result)["best_hyperparameters"]
+# except Exception as e:
+#     print(e)
+#     hyperparameters = {}
+#     hp_tuning_result = {}
 
+
+# COMMAND ----------
+
+Risk_0 = final_df_pandas[final_df_pandas['ESG_Risk_Level']==0]
+Risk_1 = final_df_pandas[final_df_pandas['ESG_Risk_Level']==1]
+outlier_fraction = len(Risk_1)/float(len(Risk_0))
+
+# COMMAND ----------
+
+from sklearn.ensemble import IsolationForest
+
+# COMMAND ----------
+
+model = IsolationForest(n_estimators=100, max_samples=len(final_df_pandas), 
+                                       contamination=outlier_fraction, verbose=0)
 
 # COMMAND ----------
 
 # DBTITLE 1,Defining the Model Pipeline
 
-if not hyperparameters or hyperparameters == {} :
-    model = LogisticRegression()
-    print(f"Using model with default hyper parameters")
-else :
-    model = LogisticRegression(**hyperparameters)
-    print(f"Using model with custom hyper parameters")
+# if not hyperparameters or hyperparameters == {} :
+#     model = IsolationForest(n_estimators=100, max_samples=len(X_train), 
+#                                        contamination=0.01, verbose=0)
+#     print(f"Using model with default hyper parameters")
+# else :
+#     model = LogisticRegression(**hyperparameters)
+#     print(f"Using model with custom hyper parameters")
 
 # Build a Scikit learn pipeline
 pipe = Pipeline([
@@ -180,17 +208,23 @@ X_test_np = X_test.to_numpy()
 
 # DBTITLE 1,Fitting the pipeline on Train data 
 # Fit the pipeline
-lr = pipe.fit(X_train_np, y_train)
+IF = pipe.fit(X_train_np, y_train)
 
 # COMMAND ----------
 
 # DBTITLE 1,Calculating the test metrics from the model
 # Predict it on Test and calculate metrics
-y_pred = lr.predict(X_test_np)
+y_pred = IF.predict(X_test_np)
+y_pred[y_pred == 1] = 0
+y_pred[y_pred == -1] = 1
 accuracy = accuracy_score(y_test, y_pred)
 f1 = f1_score(y_test, y_pred)
 precision = precision_score(y_test, y_pred)
 recall = recall_score(y_test, y_pred)
+
+# COMMAND ----------
+
+y_pred
 
 # COMMAND ----------
 
@@ -201,7 +235,9 @@ test_metrics
 # COMMAND ----------
 
 # Predict it on Train and calculate metrics
-y_pred_train = lr.predict(X_train_np)
+y_pred_train = IF.predict(X_train_np)
+y_pred_train[y_pred_train == 1] = 0
+y_pred_train[y_pred_train == -1] = 1
 accuracy = accuracy_score(y_train, y_pred_train)
 f1 = f1_score(y_train, y_pred_train)
 precision = precision_score(y_train, y_pred_train)
@@ -222,8 +258,12 @@ pred_test = pd.concat([X_test, y_test], axis = 1)
 
 # DBTITLE 1,Getting train and test predictions from the model
 # Get prediction columns
-y_pred_train = lr.predict(X_train_np)
-y_pred = lr.predict(X_test_np)
+y_pred_train = IF.predict(X_train_np)
+y_pred_train[y_pred_train == 1] = 0
+y_pred_train[y_pred_train == -1] = 1
+y_pred = IF.predict(X_test_np)
+y_pred[y_pred == 1] = 0
+y_pred[y_pred == -1] = 1
 
 # COMMAND ----------
 
@@ -236,12 +276,14 @@ y_pred = lr.predict(X_test_np)
   pred_train["dataset_type_71E4E76EB8C12230B6F51EA2214BD5FE"] = "train"
   pred_test["prediction"] = y_pred
   pred_test["dataset_type_71E4E76EB8C12230B6F51EA2214BD5FE"] = "test"
-  pred_test["probability"] = lr.predict_proba(pred_test[feature_columns]).tolist()
-  pred_train["probability"] = lr.predict_proba(pred_train[feature_columns]).tolist()
 
 # COMMAND ----------
 
 final_train_output_df = pd.concat([pred_train, pred_test])
+
+# COMMAND ----------
+
+final_train_output_df
 
 # COMMAND ----------
 
@@ -362,7 +404,6 @@ mlclient.log(operation_type = "register_model",
     feature_columns = feature_columns,
     target_columns = target_columns,
     train_data_date_dict = train_data_date_dict,
-    hp_tuning_result=hp_tuning_result,
     compute_usage_metrics = compute_metrics,
     verbose = True)
 

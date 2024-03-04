@@ -1,61 +1,57 @@
 database_name: Esg_Risk_Analysis
 ds_environment: dev
-sdk_session_id_dev: 735d0830ac764cbda453c5970ea918fa
+sdk_session_id_dev: 7a623f2f3fb74f13b9fa0b3d89d8a442
 sdk_session_id_uat: 64f8333b22dcbfd20b053385
 sdk_session_id_prod: 64ec92d6117247877965d1521
 data_engineering:
   data_engineering_ft:
     features_dbfs_path: dbfs:/mnt/mlcore/dev/source/ESG_RISK_X_a0ae0402b7ca4b3da5cbc44db54d8d77
-    features_table_name: features_table_0403_v1
-    is_scheduled : true
-    batch_size : 100
+    features_table_name: features_table_0403_v0
     primary_keys:
     - Index
   data_engineering_gt:
     ground_truth_dbfs_path: dbfs:/mnt/mlcore/dev/source/ESG_Y_123_5525423410fd49d79dcd3f4161ec257a
-    ground_truth_table_name:  groundtruth_table_0403_v1
-    is_scheduled : true
-    batch_size : 100
+    ground_truth_table_name:  groundtruth_table_0403_v0
     primary_keys:
     - Index
 data_prep_deployments:
   data_prep_deployment_ft:
-    batch_size: 50
+    batch_size: 100
     cron_job_schedule: 0 */5 * ? * *
-    features_dbfs_path: features_table_0403_v1
+    features_dbfs_path: features_table_0403_v0
     is_scheduled: true
     primary_keys:
     - Index
-    transformed_features_table_name: DPD_features_0403_v1
+    transformed_features_table_name: DPD_features_0403_v0
   data_prep_deployment_gt:
-    batch_size: 50
+    batch_size: 100
     cron_job_schedule: 0 */5 * ? * *
-    ground_truth_dbfs_path: groundtruth_table_0403_v1
+    ground_truth_dbfs_path: groundtruth_table_0403_v0
     is_scheduled: true
     primary_keys:
     - Index
-    transformed_ground_truth_table_name: DPD_groundtruth_0403_v1
+    transformed_ground_truth_table_name: DPD_groundtruth_0403_v0
 feature_pipelines:
   feature_pipelines_ft:
-    features_dbfs_path: features_table_0403_v1
+    features_dbfs_path: features_table_0403_v0
     is_scheduled: false
     primary_keys:
     - Index
-    transformed_features_table_name: Transformed_features_0403_v1
+    transformed_features_table_name: Transformed_features_0403_v0
   feature_pipelines_gt:
-    ground_truth_dbfs_path: groundtruth_table_0403_v1
+    ground_truth_dbfs_path: groundtruth_table_0403_v0
     is_scheduled: false
     primary_keys:
     - Index
-    transformed_ground_truth_table_name: Transformed_groundtruth_0403_v1
+    transformed_ground_truth_table_name: Transformed_groundtruth_0403_v0
 inference:
-  batch_size: 50
+  batch_size: 100
   cron_job_schedule: 0 */5 * ? * *
-  ground_truth_path: DPD_groundtruth_0403_v1
-  model_name: model_0403_v1
+  ground_truth_path: DPD_groundtruth_0403_v0
+  model_name: model_0403_v0
   model_version: '1'
-  output_table_name: inference_output_0403_v1
-  transformed_features_path: DPD_features_0403_v1
+  output_table_name: inference_output_0403_v0
+  transformed_features_path: DPD_features_0403_v0
 train:
   feature_columns:
   - Industry
@@ -65,17 +61,17 @@ train:
   - Social_Risk_Score
   - Controversy_Level
   - Controversy_Score
-  - sector
-  feature_table_path: Transformed_features_0403_v1
-  ground_truth_path: Transformed_groundtruth_0403_v1
-  model_name: model_0403_v1
+  - Sector
+  feature_table_path: Transformed_features_0403_v0
+  ground_truth_path: Transformed_groundtruth_0403_v0
+  model_name: model_0403_v0
   model_version: '1'
   primary_keys:
   - Index
   target_columns:
   - ESG_Risk_Level
   test_size: 0.2
-  train_output_table_name: train_output_0403_v1
+  train_output_table_name: train_output_0403_v0
   hyperparameter_tuning:
     max_evaluations : 20
     primary_metric : accuracy

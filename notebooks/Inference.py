@@ -1,6 +1,6 @@
 # Databricks notebook source
 # DBTITLE 1,Installing MLCore SDK
-# MAGIC %pip install /dbfs/FileStore/sdk/dev/MLCoreSDK-0.5.96-py3-none-any.whl --force-reinstall
+# MAGIC %pip install /dbfs/FileStore/sdk/Revanth/MLCoreSDK-0.5.96-py3-none-any.whl --force-reinstall
 
 # COMMAND ----------
 
@@ -142,6 +142,21 @@ FT_DF = spark.createDataFrame(tranformed_features_df)
 
 # COMMAND ----------
 
+features 
+
+# COMMAND ----------
+
+features = ['Industry',
+ 'Full_Time_Employees',
+ 'Environment_Risk_Score',
+ 'Governance_Risk_Score',
+ 'Social_Risk_Score',
+ 'Controversy_Level',
+ 'Controversy_Score',
+ 'Sector']
+
+# COMMAND ----------
+
 inference_df = tranformed_features_df[features]
 display(inference_df)
 
@@ -161,8 +176,14 @@ loaded_model = mlflow.sklearn.load_model(model_uri=f"models:/{model_name}/{model
 
 # COMMAND ----------
 
+loaded_model
+
+# COMMAND ----------
+
 predictions = loaded_model.predict(inference_df)
 type(predictions)
+predictions[predictions == 1] = 0
+predictions[predictions == -1] = 1
 
 # COMMAND ----------
 

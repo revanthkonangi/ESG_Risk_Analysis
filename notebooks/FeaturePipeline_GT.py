@@ -1,6 +1,6 @@
 # Databricks notebook source
 # DBTITLE 1,Installing MLCore SDK
-# MAGIC %pip install /dbfs/FileStore/sdk/dev/MLCoreSDK-0.5.96-py3-none-any.whl --force-reinstall
+# MAGIC %pip install /dbfs/FileStore/sdk/Revanth/MLCoreSDK-0.5.96-py3-none-any.whl --force-reinstall
 
 # COMMAND ----------
 
