@@ -1,19 +1,19 @@
-database_name: mysqltest_experiment
+database_name: Esg_Risk_Analysis
 ds_environment: dev
-sdk_session_id_dev: eb40921eb0d94c5f83d6e8a9309293b3
+sdk_session_id_dev: 735d0830ac764cbda453c5970ea918fa
 sdk_session_id_uat: 64f8333b22dcbfd20b053385
 sdk_session_id_prod: 64ec92d6117247877965d1521
 data_engineering:
   data_engineering_ft:
-    features_dbfs_path: dbfs:/mnt/mlcore/dev/source/Super_store_data_X_56dafba9d7a54dd7ab2d820d1a87cb46
-    features_table_name: features_table_0303_v3
+    features_dbfs_path: dbfs:/mnt/mlcore/dev/source/ESG_RISK_X_a0ae0402b7ca4b3da5cbc44db54d8d77
+    features_table_name: features_table_0403_v1
     is_scheduled : true
     batch_size : 100
     primary_keys:
     - Index
   data_engineering_gt:
     ground_truth_dbfs_path: dbfs:/mnt/mlcore/dev/source/Super_store_data_Y_b944f0603a8e4df3b971640c5f9cd85a
-    ground_truth_table_name:  groundtruth_table_0303_v3
+    ground_truth_table_name:  groundtruth_table_0403_v1
     is_scheduled : true
     batch_size : 100
     primary_keys:
@@ -22,74 +22,61 @@ data_prep_deployments:
   data_prep_deployment_ft:
     batch_size: 50
     cron_job_schedule: 0 */5 * ? * *
-    features_dbfs_path: features_table_0303_v3
+    features_dbfs_path: features_table_0403_v1
     is_scheduled: true
     primary_keys:
     - Index
-    transformed_features_table_name: DPD_features_0303_v3
+    transformed_features_table_name: DPD_features_0403_v1
   data_prep_deployment_gt:
     batch_size: 50
     cron_job_schedule: 0 */5 * ? * *
-    ground_truth_dbfs_path: groundtruth_table_0303_v3
+    ground_truth_dbfs_path: groundtruth_table_0403_v1
     is_scheduled: true
     primary_keys:
     - Index
-    transformed_ground_truth_table_name: DPD_groundtruth_0303_v3
+    transformed_ground_truth_table_name: DPD_groundtruth_0403_v1
 feature_pipelines:
   feature_pipelines_ft:
-    features_dbfs_path: features_table_0303_v3
+    features_dbfs_path: features_table_0403_v1
     is_scheduled: false
     primary_keys:
     - Index
-    transformed_features_table_name: Transformed_features_0303_v3
+    transformed_features_table_name: Transformed_features_0403_v1
   feature_pipelines_gt:
-    ground_truth_dbfs_path: groundtruth_table_0303_v3
+    ground_truth_dbfs_path: groundtruth_table_0403_v1
     is_scheduled: false
     primary_keys:
     - Index
-    transformed_ground_truth_table_name: Transformed_groundtruth_0303_v3
+    transformed_ground_truth_table_name: Transformed_groundtruth_0403_v1
 inference:
   batch_size: 50
   cron_job_schedule: 0 */5 * ? * *
-  ground_truth_path: DPD_groundtruth_0303_v3
-  model_name: model_0303_v3
+  ground_truth_path: DPD_groundtruth_0403_v1
+  model_name: model_0403_v1
   model_version: '1'
-  output_table_name: inference_output_0303_v3
-  transformed_features_path: DPD_features_0303_v3
+  output_table_name: inference_output_0403_v1
+  transformed_features_path: DPD_features_0403_v1
 train:
   feature_columns:
-  - Education
-  - Marital_Status
-  - Income
-  - Kidhome
-  - Teenhome
-  - Recency
-  - MntWines
-  - MntFruits
-  - MntMeatProducts
-  - MntFishProducts
-  - MntSweetProducts
-  - MntGoldProds
-  - NumDealsPurchases
-  - NumWebPurchases
-  - NumCatalogPurchases
-  - NumStorePurchases
-  - NumWebVisitsMonth
-  - Complain
-  - Age
-  - Reg_year
-  - Reg_month
-  - Reg_week
-  feature_table_path: Transformed_features_0303_v3
-  ground_truth_path: Transformed_groundtruth_0303_v3
-  model_name: model_0303_v3
+  - Industry
+  - Full_Time_Employees
+  - Environment_Risk_Score
+  - Governance_Risk_Score
+  - Social_Risk_Score
+  - Controversy_Level
+  - Controversy_Score
+  - sector
+  - Industry
+  feature_table_path: Transformed_features_0403_v1
+  ground_truth_path: Transformed_groundtruth_0403_v1
+  model_name: model_0403_v1
   model_version: '1'
   primary_keys:
   - Index
   target_columns:
-  - Response
+  - ESG_Risk_Level
   test_size: 0.2
-  train_output_table_name: train_output_0303_v3
+  train_output_table_name: train_output_0403_v1
   hyperparameter_tuning:
     max_evaluations : 20
     primary_metric : accuracy
